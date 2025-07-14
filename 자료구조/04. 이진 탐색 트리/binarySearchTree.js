@@ -63,43 +63,30 @@ export class BinarySearchTree {
   #remove(node, value) {
     if (!node) return null; // 제거할 값이 없으면 null 리턴
 
-    if (node.value === value) {
-      // 1. leaf(양팔 다 없음) -> 제거
-      if (!node.left && !node.right) {
-        return null;
-        // 2. leaf x, 왼팔이 없다 -> 오른팔 끌어올린다
-      } else if (!node.left) {
-        return node.right;
-      }
-      // 3. leaf x, 오른팔이 없다 -> 왼팔 끌어올린다
-      else if (!node.right) {
-        return node.left;
-      }
-      // 4. leaf x, 양팔 다 있다 -> 왼팔에서 가장 큰 애(가장 오른쪽)와 바꾼다,leaf를 지운다
-      else {
-        // 왼쪽에서 가장 큰 값 찾기
-        let exchange = node.left;
-        while (exchange.right) exchange = exchange.right;
-
-        // 위치 바꾸기
-        const tmp = node.value;
-        node.value = exchange.value;
-        exchange.value = tmp;
-
-        // 노드 제거하기
-        node.left = this.#remove(node.left, exchange.value);
-        return node;
-      }
-    }
-
     // 같은 값을 찾을 때까지 재귀 호출
     if (node.value > value) {
       node.left = this.#remove(node.left, value);
       return node;
-    } else {
+    }
+
+    if (node.value < value) {
       node.right = this.#remove(node.right, value);
       return node;
     }
+
+    // node.value === value
+    if (!node.left && !node.right) return null;
+    if (!node.left) return node.right;
+    if (!node.right) return node.left;
+
+    // 양쪽 다 있을 때
+    // 왼쪽에서 가장 큰 값 가져오기 (오른쪽 끝까지)
+    let maxNode = node.left;
+    while (maxNode.right) maxNode = maxNode.right;
+
+    node.value = maxNode.value; // 덮어쓰기
+    node.left = this.#remove(node.left, maxNode.value); // 원래 maxNode 삭제하러 가기
+    return node;
   }
 }
 
@@ -114,10 +101,10 @@ class Node {
 const bst = new BinarySearchTree();
 [8, 10, 3, 1, 14, 6, 7, 4, 13].forEach((num) => bst.insert(num));
 
-// console.log(JSON.stringify(bst.root, null, 2));
-// console.log(bst.search(7)); // Node { value: 7, left: null, right: null }
-// console.log(bst.search(8)); // Node { value: 8, left: Node, right: Node }
-// console.log(bst.search(5)); // null
+console.log(JSON.stringify(bst.root, null, 2));
+console.log(bst.search(7)); // Node { value: 7, left: null, right: null }
+console.log(bst.search(8)); // Node { value: 8, left: Node, right: Node }
+console.log(bst.search(5)); // null
 console.log(bst.remove(8));
 console.log(bst.remove(15)); // false
 console.log(bst.remove(4));
